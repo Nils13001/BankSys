@@ -2,7 +2,6 @@ package com.XYZBank.BankSys.Controller;
 
 import com.XYZBank.BankSys.Entity.TransactionEntity;
 import com.XYZBank.BankSys.Service.BankStatement;
-import com.itextpdf.text.DocumentException;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final TransactionService transactionService;
 
-    public UserServiceImpl(EmailService emailService, UserRepository userRepository, TransactionService transactionService) {
+    public UserServiceImpl(UserRepository userRepository, TransactionService transactionService) {
         this.userRepository = userRepository;
         this.transactionService = transactionService;
     }

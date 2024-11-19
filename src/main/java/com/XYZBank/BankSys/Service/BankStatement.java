@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.XYZBank.BankSys.Entity.TransactionEntity;
 import com.XYZBank.BankSys.Entity.UserEntity;
-import com.XYZBank.BankSys.Model.EmailDetails;
 import com.XYZBank.BankSys.Repository.TransactionRepository;
 import com.XYZBank.BankSys.Repository.UserRepository;
 
