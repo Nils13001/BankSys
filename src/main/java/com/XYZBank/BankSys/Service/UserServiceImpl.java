@@ -12,8 +12,7 @@ import java.math.BigDecimal;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private final EmailService emailService;
+   
 
     @Autowired
     private final UserRepository userRepository;
@@ -22,7 +21,6 @@ public class UserServiceImpl implements UserService {
     private final TransactionService transactionService;
 
     public UserServiceImpl(EmailService emailService, UserRepository userRepository, TransactionService transactionService) {
-        this.emailService = emailService;
         this.userRepository = userRepository;
         this.transactionService = transactionService;
     }
@@ -55,17 +53,6 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         UserEntity savedUser = userRepository.save(newUser);
-
-        EmailDetails emailDetails = EmailDetails.builder()
-                .recipient(savedUser.getUserEmail())
-                .subject("Account Created")
-                .messageBody("Congratulations for opening your account with our bank\nYour account details are: \n" +
-                        "Account Name: " + savedUser.getUserFirstName() + " " + savedUser.getUserLastName() +
-                        "\nAccount Number: " + savedUser.getAccountNumber() +
-                        "\nMobile Number: " + savedUser.getUserMobileNumber() +
-                        "\nEmail ID: " + savedUser.getUserEmail())
-                .build();
-        emailService.sendEmailAlert(emailDetails);
 
         return BankResponse.builder()
                 .reponseCode(Accountutils.ACCOUNT_CREATED_CODE)
@@ -137,17 +124,6 @@ public class UserServiceImpl implements UserService {
 
         transactionService.saveTransaction(transactionModel);
 
-        EmailDetails emailDetails = EmailDetails.builder()
-                .recipient(creditedUser.getUserEmail())
-                .subject("Transaction Alert")
-                .messageBody("There has been a Transaction into your account. Below are the details\n" +
-                        "Account Name: " + creditedUser.getUserFirstName() + " " + creditedUser.getUserLastName() +
-                        "\nAccount Number: " + creditedUser.getAccountNumber() +
-                        "\nTransaction Type: CREDIT"+
-                        "\nNew Account Balance: " + creditedUser.getAccountBalance())
-                .build();
-        emailService.sendEmailAlert(emailDetails);
-
         return BankResponse.builder()
                 .reponseCode(Accountutils.ACCOUNT_CREDIT_SUCCESS_CODE)
                 .responseMessage(Accountutils.ACCOUNT_CREDIT_SUCCESS_MESSAGE)
@@ -201,17 +177,6 @@ public class UserServiceImpl implements UserService {
 
         transactionService.saveTransaction(transactionModel);
 
-        EmailDetails emailDetails = EmailDetails.builder()
-                .recipient(debitedUser.getUserEmail())
-                .subject("Transaction Alert")
-                .messageBody("There has been a Transaction into your account. Below are the details\n" +
-                        "Account Name: " + debitedUser.getUserFirstName() + " " + debitedUser.getUserLastName() +
-                        "\nAccount Number: " + debitedUser.getAccountNumber() +
-                        "\nTransaction Type: DEBIT"+
-                        "\nNew Account Balance: " + debitedUser.getAccountBalance())
-                .build();
-        emailService.sendEmailAlert(emailDetails);
-
         return BankResponse.builder()
                 .reponseCode(Accountutils.ACCOUNT_DEBIT_SUCCESS_CODE)
                 .responseMessage(Accountutils.ACCOUNT_DEBIT_SUCCESS_MESSAGE)
@@ -257,17 +222,6 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         transactionService.saveTransaction(senderTransactionModel);
-        EmailDetails senderEmailDetails = EmailDetails.builder()
-                .recipient(senderAccount.getUserEmail())
-                .subject("Transaction Alert")
-                .messageBody("There has been a Transaction into your account. Below are the details\n" +
-                        "Account Name: " + senderAccount.getUserFirstName() + " " + senderAccount.getUserLastName() +
-                        "\nAccount Number: " + senderAccount.getAccountNumber() +
-                        "\nTransaction Type: DEBIT"+
-                        "\nNew Account Balance: " + senderAccount.getAccountBalance()+
-                        "\nReceiver Account Name: "+recipientAccount.getUserFirstName() + " " + recipientAccount.getUserLastName())
-                .build();
-        emailService.sendEmailAlert(senderEmailDetails);
 
         recipientAccount.setAccountBalance(recipientAccount.getAccountBalance().add(request.getAmount()));
         userRepository.save(recipientAccount);
@@ -279,17 +233,6 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         transactionService.saveTransaction(recipientTransactionModel);
-        EmailDetails recipientEmailDetails = EmailDetails.builder()
-                .recipient(recipientAccount.getUserEmail())
-                .subject("Transaction Alert")
-                .messageBody("There has been a Transaction into your account. Below are the details\n" +
-                        "Account Name: " + recipientAccount.getUserFirstName() + " " + recipientAccount.getUserLastName() +
-                        "\nAccount Number: " + recipientAccount.getAccountNumber() +
-                        "\nTransaction Type: CREDIT"+
-                        "\nNew Account Balance: " + recipientAccount.getAccountBalance()+
-                        "\nSender Account Name: "+senderAccount.getUserFirstName() + " " + senderAccount.getUserLastName())
-                .build();
-        emailService.sendEmailAlert(recipientEmailDetails);
 
         return BankResponse.builder()
                 .reponseCode(Accountutils.ACCOUNT_TRANSFER_SUCCESS_CODE)
