@@ -14,35 +14,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Users")
-public class UserEntity {
+@Table(name = "Transactions")
+public class TransactionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String transactionId;
 
-    private String userFirstName;
+    private String transactionType;
 
-    private String userLastName;
-
-    private String userGender;
-
-    private String userAddress;
+    private BigDecimal amount;
 
     private String accountNumber;
 
-    private String userMobileNumber;
-
-    private String userEmail;
-
-    private BigDecimal accountBalance;
-
-    private String userStatus;
-
-    @CreationTimestamp
-    private LocalDateTime userCreatedAt;
-
-    @UpdateTimestamp
-    private LocalDateTime userModifiedAt;
+    private String accountStatus;
 
 }
