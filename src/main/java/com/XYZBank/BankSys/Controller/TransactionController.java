@@ -22,7 +22,7 @@ public class TransactionController {
     @GetMapping("/bankStatement")
     public List<TransactionEntity> generateBankStatement(@RequestParam String accountNumber,
                                                          @RequestParam String startDate,
-                                                         @RequestParam String endDate) throws DocumentException, FileNotFoundException {
+                                                         @RequestParam String endDate) {
         return bankStatement.generateStatement(accountNumber, startDate, endDate);
     }
 
