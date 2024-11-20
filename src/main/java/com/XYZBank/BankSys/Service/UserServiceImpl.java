@@ -1,10 +1,17 @@
 package com.XYZBank.BankSys.Service;
 
+import com.XYZBank.BankSys.Config.JwtTokenProvider;
+import com.XYZBank.BankSys.Entity.Role;
 import com.XYZBank.BankSys.Entity.UserEntity;
 import com.XYZBank.BankSys.Model.*;
 import com.XYZBank.BankSys.Repository.UserRepository;
 import com.XYZBank.BankSys.Utils.Accountutils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,10 +28,21 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final TransactionService transactionService;
 
-    public UserServiceImpl(EmailService emailService, UserRepository userRepository, TransactionService transactionService) {
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    public UserServiceImpl(EmailService emailService, UserRepository userRepository, TransactionService transactionService, PasswordEncoder passwordEncoder) {
+
         this.emailService = emailService;
         this.userRepository = userRepository;
         this.transactionService = transactionService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -48,10 +66,12 @@ public class UserServiceImpl implements UserService {
                 .userAddress(userModel.getUserAddress())
                 .userGender(userModel.getUserGender())
                 .userEmail(userModel.getUserEmail())
+                .userPassword(passwordEncoder.encode(userModel.getUserPassword()))
                 .userMobileNumber(userModel.getUserMobileNumber())
                 .accountNumber(Accountutils.generateAccountNumber())
                 .accountBalance(userModel.getAccountBalance())
                 .userStatus("ACTIVE")
+                .role(Role.valueOf("ROLE_ADMIN"))
                 .build();
 
         UserEntity savedUser = userRepository.save(newUser);
@@ -223,6 +243,42 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    public BankResponse login(LoginModel loginModel){
+
+        Authentication authentication = null;
+        authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginModel.getEmail(), loginModel.getPassword())
+        );
+
+        //ChatGPT Code
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String toeken = jwtTokenProvider.generateToken(authentication);
+
+        System.out.println(toeken);
+
+        if(toeken==null){
+            BankResponse.builder()
+                    .reponseCode("Token Generation Error")
+                    .responseMessage(jwtTokenProvider.generateToken(authentication))
+                    .build();
+        }
+
+        EmailDetails loginAlert = EmailDetails.builder()
+                .subject("Log-In Alert")
+                .recipient(loginModel.getEmail())
+                .messageBody("There was a login made to your account. Contact your branch if this wasn't you")
+                .build();
+
+        emailService.sendEmailAlert(loginAlert);
+
+        return BankResponse.builder()
+                .reponseCode("Login Success")
+                .responseMessage(jwtTokenProvider.generateToken(authentication))
+                .build();
+
+    }
+
     @Override
     public BankResponse transferAmount(TransferRequest request) {
         boolean isRecipientAccountExist = userRepository.existsByAccountNumber(request.getRecipientAccountNumber());
@@ -297,6 +353,7 @@ public class UserServiceImpl implements UserService {
                 .accountModel(null)
                 .build();
     }
+
 
 
 }

@@ -34,6 +34,19 @@ public class UserController {
     }
 
     @Operation(
+            summary = "Login Page",
+            description = "Logging in to the platform"
+    )
+    @ApiResponse(
+            responseCode = "225",
+            description = "HTTP Status 225 LOGGED IN"
+    )
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody LoginModel loginModel){
+        return userService.login(loginModel);
+    }
+
+    @Operation(
             summary = "Enquiring Balance",
             description = "Finding Balance of a User using Account Number"
     )

@@ -25,6 +25,8 @@ public class UserModel {
 
     private String userEmail;
 
+    private String userPassword;
+
     private String userStatus;
 
     private BigDecimal accountBalance;
