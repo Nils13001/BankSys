@@ -69,6 +69,7 @@ public class UserEntity implements UserDetails {
         return userEmail;
     }
 
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -89,3 +90,4 @@ public class UserEntity implements UserDetails {
         return true;
     }
 }
+

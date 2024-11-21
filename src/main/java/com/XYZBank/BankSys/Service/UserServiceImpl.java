@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -98,6 +97,37 @@ public class UserServiceImpl implements UserService {
                 .build();
 
     }
+
+    @Override
+    public BankResponse login(LoginModel loginModel) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginModel.getEmail(), loginModel.getPassword())
+        );
+        if(authentication.isAuthenticated()) {
+
+            EmailDetails loginAlert = EmailDetails.builder()
+                    .subject("Log-In Alert")
+                    .recipient(loginModel.getEmail())
+                    .messageBody("There was a login made to your account. Contact your branch if this wasn't you")
+                    .build();
+
+            emailService.sendEmailAlert(loginAlert);
+
+            return BankResponse.builder()
+                    .reponseCode("222")
+                    .responseMessage("Login Successful! "+jwtTokenProvider.generateToken(loginModel.getEmail()))
+                    .accountModel(null)
+                    .build();
+
+
+        }
+        else return BankResponse.builder()
+                .reponseCode("402")
+                .responseMessage("Login Unsuccessful")
+                .accountModel(null)
+                .build();
+    }
+
 
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest request) {
@@ -243,41 +273,6 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    public BankResponse login(LoginModel loginModel){
-
-        Authentication authentication = null;
-        authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginModel.getEmail(), loginModel.getPassword())
-        );
-
-        //ChatGPT Code
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String toeken = jwtTokenProvider.generateToken(authentication);
-
-        System.out.println(toeken);
-
-        if(toeken==null){
-            BankResponse.builder()
-                    .reponseCode("Token Generation Error")
-                    .responseMessage(jwtTokenProvider.generateToken(authentication))
-                    .build();
-        }
-
-        EmailDetails loginAlert = EmailDetails.builder()
-                .subject("Log-In Alert")
-                .recipient(loginModel.getEmail())
-                .messageBody("There was a login made to your account. Contact your branch if this wasn't you")
-                .build();
-
-        emailService.sendEmailAlert(loginAlert);
-
-        return BankResponse.builder()
-                .reponseCode("Login Success")
-                .responseMessage(jwtTokenProvider.generateToken(authentication))
-                .build();
-
-    }
 
     @Override
     public BankResponse transferAmount(TransferRequest request) {
@@ -353,7 +348,5 @@ public class UserServiceImpl implements UserService {
                 .accountModel(null)
                 .build();
     }
-
-
 
 }

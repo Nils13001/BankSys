@@ -5,6 +5,7 @@ import com.XYZBank.BankSys.Service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,7 @@ public class UserController {
             responseCode = "201",
             description = "HTTP Status 201 CREATED"
     )
-    @PostMapping
+    @PostMapping("/register")
     public BankResponse createAccount(@RequestBody UserModel userModel){
         return userService.createAccount(userModel);
     }
@@ -43,6 +44,7 @@ public class UserController {
     )
     @PostMapping("/login")
     public BankResponse login(@RequestBody LoginModel loginModel){
+        //System.out.println(loginModel.getEmail()+" "+loginModel.getPassword());
         return userService.login(loginModel);
     }
 
@@ -109,6 +111,11 @@ public class UserController {
     @PostMapping("/transfer")
     public BankResponse transferAccount(@RequestBody TransferRequest request){
         return userService.transferAmount(request);
+    }
+
+    @GetMapping("/")
+    public String greet(HttpServletRequest request){
+        return request.getSession().getId();
     }
 
 }
